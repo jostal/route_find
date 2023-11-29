@@ -13,11 +13,19 @@ function parseRoute(routeData) {
   let routeGeo = route.geometry.coordinates
   let routeDistance = route.distance
   let routeSteps = route.legs[0].steps
-  
+
   let output = {
-    geo: routeGeo,
-    distance: routeDistance,
     steps: routeSteps
+  }
+
+  return output
+}
+
+function simRoute(routeData) {
+  console.log(routeData)
+
+  let output = {
+
   }
 
   return output
@@ -27,4 +35,4 @@ function exportJson(jsonObj) {
   return "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(jsonObj))
 }
 
-export { searchAddress, reqRoute, parseRoute, exportJson }
+export { searchAddress, reqRoute, parseRoute, simRoute, exportJson }

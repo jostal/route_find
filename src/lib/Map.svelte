@@ -5,12 +5,18 @@
   import Control from "ol/control/Control.js";
   import Feature from "ol/Feature.js";
   import Point from "ol/geom/Point.js";
-  import LineString from "ol/geom/LineString.js"
+  import LineString from "ol/geom/LineString.js";
   import { Icon, Stroke, Style } from "ol/style.js";
   import { Tile as TileLayer, Vector as VectorLayer } from "ol/layer.js";
-  import { Vector as VectorSource } from "ol/source.js"
+  import { Vector as VectorSource } from "ol/source.js";
   import { onMount } from "svelte";
-  import { searchAddress, reqRoute, parseRoute, exportJson } from "./utils.js";
+  import {
+    searchAddress,
+    reqRoute,
+    parseRoute,
+    simRoute,
+    exportJson,
+  } from "./utils.js";
 
   useGeographic();
 
@@ -19,18 +25,18 @@
   let map;
   let position;
   let addressSearch;
-  let featureLayer
-  let featureLayerEnd
-  let startFeature
-  let endFeature
-  let routeFeature
+  let featureLayer;
+  let featureLayerEnd;
+  let startFeature;
+  let endFeature;
+  let routeFeature;
 
   let startSuggestions;
   let endSuggestions;
   let routeStart;
   let routeEnd;
-  let routeLayer
-  let routeRes
+  let routeLayer;
+  let routeRes;
 
   const rasterLayer = new TileLayer({
     source: new OSM(),
@@ -83,63 +89,74 @@
 
   function setStart(index) {
     routeStart = startSuggestions[index];
-    startSuggestions = null
+    startSuggestions = null;
 
-    map.removeLayer(featureLayer)
-    startFeature = new Feature(new Point([parseFloat(routeStart.lon), parseFloat(routeStart.lat)]))
+    map.removeLayer(featureLayer);
+    startFeature = new Feature(
+      new Point([parseFloat(routeStart.lon), parseFloat(routeStart.lat)])
+    );
     featureLayer = new VectorLayer({
       className: "startLayer",
       source: new VectorSource({
-        features: [startFeature]
+        features: [startFeature],
       }),
       style: new Style({
         image: new Icon({
-          src: 'startMarker.svg',
-          scale: 0.2
-        })
-      })
-    })
-    map.addLayer(featureLayer)
+          src: "startMarker.svg",
+          scale: 0.2,
+        }),
+      }),
+    });
+    map.addLayer(featureLayer);
   }
 
   function setEnd(index) {
     routeEnd = endSuggestions[index];
     endSuggestions = null;
 
-    map.removeLayer(featureLayerEnd)
-    endFeature = new Feature(new Point([parseFloat(routeEnd.lon), parseFloat(routeEnd.lat)]))
+    map.removeLayer(featureLayerEnd);
+    endFeature = new Feature(
+      new Point([parseFloat(routeEnd.lon), parseFloat(routeEnd.lat)])
+    );
     featureLayerEnd = new VectorLayer({
       className: "endLayer",
       source: new VectorSource({
-        features: [endFeature]
+        features: [endFeature],
       }),
       style: new Style({
         image: new Icon({
-          src: 'endMarker.svg',
-          scale: 0.2
-        })
-      })
-    })
-    map.addLayer(featureLayerEnd)
+          src: "endMarker.svg",
+          scale: 0.2,
+        }),
+      }),
+    });
+    map.addLayer(featureLayerEnd);
   }
 
   async function findRoute() {
-    routeRes = await reqRoute(routeStart.lon, routeStart.lat, routeEnd.lon, routeEnd.lat) 
+    routeRes = await reqRoute(
+      routeStart.lon,
+      routeStart.lat,
+      routeEnd.lon,
+      routeEnd.lat
+    );
 
-    map.removeLayer(routeLayer)
-    routeFeature = new Feature(new LineString(routeRes.routes[0].geometry.coordinates))
+    map.removeLayer(routeLayer);
+    routeFeature = new Feature(
+      new LineString(routeRes.routes[0].geometry.coordinates)
+    );
     routeLayer = new VectorLayer({
       source: new VectorSource({
-        features: [routeFeature]
+        features: [routeFeature],
       }),
       style: new Style({
         stroke: new Stroke({
-          color: '#3268ab',
-          width: 4
-        })
-      })
-    })
-    map.addLayer(routeLayer)
+          color: "#3268ab",
+          width: 4,
+        }),
+      }),
+    });
+    map.addLayer(routeLayer);
   }
 </script>
 
@@ -167,7 +184,12 @@
       <button on:click={findRoute}>Find Route</button>
     {/if}
     {#if routeRes}
-      <button><a href={exportJson(parseRoute(routeRes))} download="route.json">Download route.json</a></button>
+      <button
+        ><a href={exportJson(parseRoute(routeRes))} download="route.json"
+          >Download route.json</a
+        ></button
+      >
+      <button><a href={exportJson(simRoute(routeRes))} /></button>
     {/if}
   </div>
 
