@@ -4,17 +4,18 @@ async function searchAddress(query) {
 }
 
 async function reqRoute(lonStart, latStart, lonEnd, latEnd) {
-  const res = await fetch(`http://router.project-osrm.org/route/v1/cycling/${lonStart},${latStart};${lonEnd},${latEnd}?geometries=geojson&steps=true`)
+  const res = await fetch(`http://router.project-osrm.org/route/v1/cycling/${lonStart},${latStart};${lonEnd},${latEnd}?geometries=geojson&steps=true&overview=full`)
   return res.json()
 }
 
 function parseRoute(routeData) {
   let route = routeData.routes[0]
-  let routeGeo = route.geometry.coordinates
+  let routeGeo = route.geometry
   let routeDistance = route.distance
   let routeSteps = route.legs[0].steps
 
   let output = {
+    geometry: routeGeo,
     steps: routeSteps
   }
 
